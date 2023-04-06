@@ -1,0 +1,5 @@
+{
+    "glsl-canvas.uniforms": {
+        "smoothFactor": 1.0
+    }
+}
