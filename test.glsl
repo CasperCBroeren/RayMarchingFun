@@ -7,11 +7,9 @@ uniform float smoothFactor;
 // Constants
 #define PI 3.1415925359
 
-#define MAX_STEPS 200
-#define MAX_DIST 100.
-#define SURFACE_DIST .01
-#define ZOOM 0.9
-
+#define MAX_STEPS 300
+#define MAX_DIST 300.
+#define SURFACE_DIST .1
 
 struct Sphere { vec3 position; float size; vec3 color; };
 
@@ -62,21 +60,35 @@ float cappedCylinderSdf( vec3 point, float height, float radius)
 
 vec4 scene2(vec3 position)
 {      
-    Sphere head = Sphere(vec3(0,1,0), 1.0, vec3(1,0,0));
-    Sphere earL = Sphere(vec3(-1,2,0), 0.5, vec3(0,1,0));
-    Sphere earR = Sphere(vec3(1,2,0), 0.5, vec3(0,0,1));
-     
+    float goopTime = u_time * 0.5;
+    Sphere head = Sphere(vec3(0,2,3), 1.25, vec3(0.9412, 0.2, 0.2));
+    Sphere ear1 = Sphere(vec3(1.0* sin(4.0 - goopTime), 2.0+1.0* cos(4.0 - goopTime), 3) , 0.5, vec3(0.9412, 0.2, 0.2));
+    Sphere ear2 = Sphere(vec3(1.0* sin(4.0 + goopTime), 2.0+1.0* cos(4.0 + goopTime), 3) , 0.5, vec3(0.9412, 0.2, 0.2));
+    Sphere ear3 = Sphere(vec3(1.0* sin(2.0 - goopTime), 2.0+1.0* cos(2.0 - goopTime), 3) , 0.5, vec3(0.9412, 0.2, 0.2));
+    Sphere ear4 = Sphere(vec3(1.0* sin(2.0 + goopTime), 2.0+1.0* cos(2.0 + goopTime), 3) , 0.5, vec3(0.9412, 0.2, 0.2));
+    Sphere ear5 = Sphere(vec3(1.0* sin(6.0 + goopTime), 2.0+1.0* cos(6.0 + goopTime), 3) , 0.5, vec3(0.9412, 0.2, 0.2));
+    Sphere ear6 = Sphere(vec3(1.0* sin(6.0 - goopTime), 2.0+1.0* cos(6.0 - goopTime), 3) , 0.5, vec3(0.9412, 0.2, 0.2));
+
     return vec4(head.color.rgb, 
                 smoothUnionSdf(
+                smoothUnionSdf(
+                smoothUnionSdf(
+                smoothUnionSdf(
+                smoothUnionSdf(
                 smoothUnionSdf(sphereSDF(position-head.position, head.size),
-                               sphereSDF(position-earL.position, earL.size)), 
-                               sphereSDF(position-earR.position, earR.size)));
+                               sphereSDF(position-ear1.position, ear1.size)), 
+                               sphereSDF(position-ear2.position, ear2.size)), 
+                               sphereSDF(position-ear3.position, ear3.size)), 
+                               sphereSDF(position-ear4.position, ear4.size)),
+                               sphereSDF(position-ear5.position, ear5.size)),
+                               sphereSDF(position-ear6.position, ear6.size))
+                               );
     
 }
 
 vec4 scene(vec3 position)
 {
-    vec3 floorColor = vec3(0.4471, 0.7608, 0.9059);
+    vec3 floorColor = vec3(0.9333, 0.4353, 0.6431);
     float floorPlane = position.y+0.25;  
     return unionSdf(scene2(position), vec4(floorColor.rgb, floorPlane));
 }
@@ -124,22 +136,21 @@ vec3 GetLight(vec3 position, vec3 color)
 
     float d = RayMarch(position + normal  * SURFACE_DIST * 2., light, color);
     
-    if (d < length(lightPos - position)) diffuse *= 0.1;
- 
+
     return  color * diffuse;
 }
  
 void main()
 {
     vec2 viewPlane = (gl_FragCoord.xy-.5*u_resolution.xy)/u_resolution.y;
-    vec3 camera = vec3(u_camera.x,  1, u_camera.z); 
+    vec3 camera = u_camera; 
     vec3 projection = normalize(vec3(viewPlane.x, viewPlane.y, 1));
-    vec3 color = vec3(1,1,1);
+    vec3 color = vec3(1.0, 1.0, 1.0);
     
     float distance = RayMarch(camera, projection, color); 
     vec3 ray = camera + projection * distance;
 
     vec3 light = GetLight(ray, color);
         
-    gl_FragColor = vec4(light,1.0);
+    gl_FragColor = vec4(light,0.75);
 }
