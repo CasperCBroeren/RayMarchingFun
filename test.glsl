@@ -4,8 +4,7 @@ uniform float u_time;  // Time elapsed
 uniform vec3 u_camera;
 uniform float smoothFactor;
  
-// Constants
-#define PI 3.1415925359
+// Constants 
 
 #define MAX_STEPS 300
 #define MAX_DIST 300.
