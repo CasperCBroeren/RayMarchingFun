@@ -30,7 +30,16 @@ void sceneDefinition()
     items[2] = SO(SO_BOX, vec3(0, 0, 3) , vec3(1, 1,1), vec3(1.0, 0.7333, 0.0));
 }
  
- 
+float getDistance(vec3 rayPos, SO item)
+{
+    return (item.type == SO_SPHERE) 
+                ? sphereSdf(rayPos, item, u_time) 
+            : (item.type == SO_BOX)
+                ? boxSdf(rayPos, item, u_time) 
+            : (item.type == SO_GOOP)
+                ? goopSdf(rayPos, item, u_time) 
+            : MAX_DIST;
+} 
  
 void main()
 {
@@ -51,14 +60,8 @@ void main()
         float closestDist = 100.0;
         int closestItem = -1;
         for (int j = 0; j < items.length(); j++) {
-            SO item = items[j];
-            float itemDist = (item.type == SO_SPHERE) 
-                                ? sphereSdf(rayPos, item, u_time) 
-                             : (item.type == SO_BOX)
-                                ? boxSdf(rayPos, item, u_time) 
-                            : (item.type == SO_GOOP)
-                                ? goopSdf(rayPos, item, u_time) 
-                                : MAX_DIST;
+                       
+            float itemDist = getDistance(rayPos, items[j]);
             if (itemDist < closestDist) {
                 closestDist = itemDist;                
             }
