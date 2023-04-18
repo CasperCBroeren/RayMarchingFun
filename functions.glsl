@@ -1,7 +1,8 @@
 #define SO_SPHERE 1
 #define SO_BOX 2
 #define SO_GOOP 20
-
+#define SO_SIN_STRING 21
+#define PI 3.14159
 
 struct SO { int type; vec3 position; vec3 size; vec3 color; };
 
@@ -46,7 +47,6 @@ float _sphereSdf(vec3 ray, float size)  {
   return length( ray)-size;
 }
 
-
 float sphereSdf(vec3 ray, SO sphere, float u_time)  {
   return _sphereSdf(ray-sphere.position, sphere.size.x);
 }
@@ -54,6 +54,36 @@ float sphereSdf(vec3 ray, SO sphere, float u_time)  {
 float boxSdf(vec3 ray, SO box, float u_time)  {
   vec3 q = abs(ray - box.position) - box.size;
   return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+}
+
+float sinStringSdf(vec3 ray, SO sinString, float u_time)
+{
+    float goopTime = u_time * 2.0; 
+    float k = 0.4;
+    float size = sinString.size.x;
+    
+    ray -= sinString.position;
+    vec3 b1 = vec3(-2.0, cos(PI * 0.0 + goopTime), 0);    
+    vec3 b1i = vec3(-1.75, cos(PI * 0.125 + goopTime), 0);    
+    vec3 b2 = vec3(-1.5, cos(PI * 0.25 + goopTime), 0);
+    vec3 b2i = vec3(-1.25, cos(PI * 0.375 + goopTime), 0);
+    vec3 b3 = vec3(-1.0, cos(PI * 0.5 + goopTime), 0);
+    vec3 b3i = vec3(-0.75, cos(PI * 0.625 + goopTime), 0);
+    vec3 b4 = vec3(-0.5, cos(PI * 0.75 + goopTime), 0);
+
+    return  
+            smoothUnionSdf(
+            smoothUnionSdf(
+            smoothUnionSdf(
+            smoothUnionSdf(
+            smoothUnionSdf(
+            smoothUnionSdf(_sphereSdf(ray-b1, size),
+                            _sphereSdf(ray-b1i, size), k),
+                            _sphereSdf(ray-b2, size), k), 
+                            _sphereSdf(ray-b2i, size), k),
+                            _sphereSdf(ray-b3, size), k), 
+                            _sphereSdf(ray-b3i, size), k),
+                            _sphereSdf(ray-b4, size), k);
 }
 
 float goopSdf(vec3 ray, SO goop, float u_time)

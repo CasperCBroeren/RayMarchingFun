@@ -27,7 +27,8 @@ void sceneDefinition()
 {    
     items[0] = SO(SO_SPHERE, vec3(0,2,3), vec3(0.75, 1,1), vec3(0.7686, 0.7608, 0.5098));
     items[1] = SO(SO_GOOP, vec3(.0, 5.0, 3) , vec3(0.5, 1,1), vec3(0.9804, 0.3922, 0.0));
-    items[2] = SO(SO_BOX, vec3(0, 0, 3) , vec3(1, 1,1), vec3(1.0, 0.7333, 0.0));
+    items[2] = SO(SO_SIN_STRING, vec3(0, 0, 3) , vec3(0.5, 0.1, 0.1), vec3(1.0, 0.7333, 0.0));
+    
 }
  
 float getDistance(vec3 rayPos, SO item)
@@ -38,6 +39,8 @@ float getDistance(vec3 rayPos, SO item)
                 ? boxSdf(rayPos, item, u_time) 
             : (item.type == SO_GOOP)
                 ? goopSdf(rayPos, item, u_time) 
+            : (item.type == SO_SIN_STRING)
+                ? sinStringSdf(rayPos, item, u_time) 
             : MAX_DIST;
 } 
  
